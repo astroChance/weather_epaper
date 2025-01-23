@@ -4,59 +4,106 @@ from bs4 import BeautifulSoup
 import json
 from keys import *
 
-import epaper
 epap_model = "epd7in3f"
-epd = epaper.epaper(epap_model).EPD()
-
 
 ## color coding functions
-def pollen_color(pollen_level):
-    if pollen_level.lower()=="low":
-        color=epd.GREEN
-    elif pollen_level.lower()=="medium":
-        color=epd.YELLOW
-    elif pollen_level.lower()=="heavy":
-        color=epd.RED
-    elif pollen_level.lower()=="extremely heavy":
-        color=epd.RED
+def pollen_color(pollen_level, debug=False):
+    if debug:
+        if pollen_level.lower()=="low":
+            color="green"
+        elif pollen_level.lower()=="medium":
+            color="yellow"
+        elif pollen_level.lower()=="heavy":
+            color="red"
+        elif pollen_level.lower()=="extremely heavy":
+            color="red"
+        else:
+            color="white"
     else:
-        color=epd.WHITE
+        import epaper
+        epd = epaper.epaper(epap_model).EPD()
+        if pollen_level.lower()=="low":
+            color=epd.GREEN
+        elif pollen_level.lower()=="medium":
+            color=epd.YELLOW
+        elif pollen_level.lower()=="heavy":
+            color=epd.RED
+        elif pollen_level.lower()=="extremely heavy":
+            color=epd.RED
+        else:
+            color=epd.WHITE
     return color
 
-def aq_color(aq_code):
-    if aq_code is None:
-        color=epd.WHITE
-    elif aq_code==1:
-        color=epd.GREEN
-    elif aq_code==2:
-        color=epd.YELLOW
-    elif aq_code==3:
-        color=epd.ORANGE
-    elif aq_code>=4:
-        color=epd.RED
+def aq_color(aq_code, debug=False):
+    if debug:
+        if aq_code is None:
+            color="white"
+        elif aq_code==1:
+            color="green"
+        elif aq_code==2:
+            color="yellow"
+        elif aq_code==3:
+            color="orange"
+        elif aq_code>=4:
+            color="red"
+        else:
+            color="white"
     else:
-        color=epd.WHITE
+        import epaper
+        epd = epaper.epaper(epap_model).EPD()
+        if aq_code is None:
+            color=epd.WHITE
+        elif aq_code==1:
+            color=epd.GREEN
+        elif aq_code==2:
+            color=epd.YELLOW
+        elif aq_code==3:
+            color=epd.ORANGE
+        elif aq_code>=4:
+            color=epd.RED
+        else:
+            color=epd.WHITE
     return color
 
-def uvi_color(uvi):
-    if uvi is None:
-        return epd.BLACK
-    elif uvi<0:
-        return epd.BLACK
+def uvi_color(uvi, debug=False):
+    if debug:
+        if uvi is None:
+            return "black"
+        elif uvi<0:
+            return "black"
+        else:
+            pass
+        uvi = round(uvi)
+        if uvi<=2:
+            color="green"
+        elif uvi<=5:
+            color="yellow"
+        elif uvi<=7:
+            color="orange"
+        elif uvi>=8:
+            color="red"
+        else:
+            color="black"
     else:
-        pass
-
-    uvi = round(uvi)
-    if uvi<=2:
-        color=epd.GREEN
-    elif uvi<=5:
-        color=epd.YELLOW
-    elif uvi<=7:
-        color=epd.ORANGE
-    elif uvi>=8:
-        color=epd.R
-    else:
-        color=epd.B
+        import epaper
+        epd = epaper.epaper(epap_model).EPD()
+        if uvi is None:
+            return epd.BLACK
+        elif uvi<0:
+            return epd.BLACK
+        else:
+            pass
+        uvi = round(uvi)
+        if uvi<=2:
+            color=epd.GREEN
+        elif uvi<=5:
+            color=epd.YELLOW
+        elif uvi<=7:
+            color=epd.ORANGE
+        elif uvi>=8:
+            color=epd.RED
+        else:
+            color=epd.BLACK
     return color
 
 

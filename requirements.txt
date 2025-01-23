@@ -1,0 +1,8 @@
+beautifulsoup4
+pillow
+requests
+RPi.GPIO
+schedule
+spidev
+urllib3
+waveshare-epaper

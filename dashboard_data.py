@@ -331,6 +331,8 @@ def get_pollen_data():
     Query the Houston Health Department for pollen/allergen
     data. Only available Monday-Friday, so return the recent Friday
     data if it is currently the weekend.
+
+    Add some fixes because COH keeps fucking up the url
     """
     url_base = "https://www.houstonhealth.org/services/pollen-mold/"
     payload_base = "houston-pollen-mold-count-"
@@ -344,13 +346,24 @@ def get_pollen_data():
         payload = payload_base+payload_addition
         url = url_base + payload
         page = requests.get(url)
-    if page.status_code in [404, 504]:
-        pollen_data = {}
-        pollen_data["TREE"] = None
-        pollen_data["WEED"] = None
-        pollen_data["GRASS"] = None
-        pollen_data["MOLD SPORES"] = None
-        return pollen_data
+
+        if page.status_code == 404:
+            ## because they fat finger the second hyphen
+            payload_addition = make_payload_addition()
+            idx = payload_addition.rfind("-")
+            payload_addition = payload_addition[:idx] + payload_addition[idx+1:]
+            payload = payload_base+payload_addition
+            url = url_base + payload
+            page = requests.get(url)
+
+            if page.status_code == 404:
+                ## because they fat finger the second hyphen
+                payload_addition = make_payload_addition(use_yesterday=True)
+                idx = payload_addition.rfind("-")
+                payload_addition = payload_addition[:idx] + payload_addition[idx+1:]
+                payload = payload_base+payload_addition
+                url = url_base + payload
+                page = requests.get(url)
     
     soup = BeautifulSoup(page.content, "html.parser")
     tmp = soup.find_all("p", class_="text-align-center")
@@ -360,6 +373,8 @@ def get_pollen_data():
         tmp_data = str(i)[37:].replace("</strong><br/><strong>", " ").split()
         pollen_type = ' '.join([tmp_data[0], tmp_data[1]])
         pollen_level = tmp_data[2]
+        pollen_type = pollen_type.replace("<br/>", "")
+        pollen_level = pollen_level.replace("<br/>", "")
         pollen_data[pollen_type] = pollen_level
 
     return pollen_data
@@ -494,7 +509,9 @@ def daily_forecast(response, days=5):
     forecast = resp["daily"][:days]
     for f in forecast:
         day = f["dt"]
-        day  = convert_utc(day).day
+        day  = convert_utc(day).weekday()
+        day_list = ["MON", "TUE","WED", "THU", "FRI", "SAT", "SUN"]
+        day = day_list[day]
 
         max_temp = f["temp"]["max"]
         max_temp = kelvin_to_farenheit(max_temp)

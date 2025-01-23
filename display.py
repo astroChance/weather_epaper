@@ -211,6 +211,18 @@ def make_display(debug=debug):
                 
                 
             ## Upper right
+            tree_pollen_color = white
+            weed_pollen_color = white
+            grass_pollen_color = white
+            mold_spores_color = white
+            oz_color = white
+            part_color = white
+            oz_fore_color = white
+            part_fore_color = white
+
+            allergen_xlocs = [440, 530, 620, 710]
+            allergen_yloc = 95
+
             try:
                 pollen_data = get_pollen_data()
                 tree_pollen_color = pollen_color(pollen_data["TREE POLLEN"], debug=debug)
@@ -226,93 +238,89 @@ def make_display(debug=debug):
                 part_color = aq_color(part_code, debug=debug)
                 oz_fore_color = aq_color(oz_fore_code, debug=debug)
                 part_fore_color = aq_color(part_fore_code, debug=debug)
-                
-                # place the icons
-                allergen_xlocs = [440, 530, 620, 710]
-                allergen_yloc = 95
 
-                icon_path = "./icons/tree.bmp"
-                tree_7color = Image.open(icon_path)
-                newsize = (40,40)
-                tree_7color = tree_7color.resize(newsize, Image.NEAREST)
-                my_display.paste(tree_7color, (allergen_xlocs[0],allergen_yloc))
-
-                icon_path = "./icons/weed.bmp"
-                weed_7color = Image.open(icon_path)
-                newsize = (40,40)
-                weed_7color = weed_7color.resize(newsize, Image.NEAREST)
-                my_display.paste(weed_7color, (allergen_xlocs[1],allergen_yloc))
-
-                icon_path = "./icons/grass.bmp"
-                grass_7color = Image.open(icon_path)
-                newsize = (40,40)
-                grass_7color = grass_7color.resize(newsize, Image.NEAREST)
-                my_display.paste(grass_7color, (allergen_xlocs[2],allergen_yloc))
-                
-                icon_path = "./icons/mold.bmp"
-                mold_7color = Image.open(icon_path)
-                newsize = (40,40)
-                mold_7color = mold_7color.resize(newsize, Image.NEAREST)
-                my_display.paste(mold_7color, (allergen_xlocs[3],allergen_yloc))
-
-
-                # place the icon color levels
-                draw.text((allergen_xlocs[0]-5, allergen_yloc+50), 
-                          'TREE', font=nasa_font_18, fill=tree_pollen_color,
-                         stroke_width=1, stroke_fill=sub_text_col1)
-                draw.text((allergen_xlocs[1]-5, allergen_yloc+50), 
-                          'WEED', font=nasa_font_18, fill=weed_pollen_color,
-                         stroke_width=1, stroke_fill=sub_text_col1)
-                draw.text((allergen_xlocs[2]-5, allergen_yloc+50), 
-                          'GRASS', font=nasa_font_18, fill=grass_pollen_color,
-                         stroke_width=1, stroke_fill=sub_text_col1)
-                draw.text((allergen_xlocs[3]-5, allergen_yloc+50), 
-                          'MOLD', font=nasa_font_18, fill=mold_spores_color,
-                         stroke_width=1, stroke_fill=sub_text_col1)
-                
-                # place the air quality boxes
-                today_ozone_coords = (upper_right_coords[0]+100, upper_right_coords[1]+25,
-                                      upper_right_coords[0]+235, upper_right_coords[1]+50)
-                today_part_coords = (upper_right_coords[0]+240, upper_right_coords[1]+25,
-                                      upper_right_coords[0]+375, upper_right_coords[1]+50)
-                draw.rounded_rectangle(today_ozone_coords, outline=outline_color, 
-                                       width=outline_width, radius=corner_radius,
-                                      fill=oz_color)
-                draw.rounded_rectangle(today_part_coords, outline=outline_color, 
-                                       width=outline_width, radius=corner_radius,
-                                      fill=part_color)
-
-                tomorrow_ozone_coords = (upper_right_coords[0]+50, upper_right_coords[1]+185,
-                                      upper_right_coords[0]+185, upper_right_coords[1]+210)
-                tomorrow_part_coords = (upper_right_coords[0]+210, upper_right_coords[1]+185,
-                                      upper_right_coords[0]+345, upper_right_coords[1]+210)
-                draw.rounded_rectangle(tomorrow_ozone_coords, outline=outline_color, 
-                                       width=outline_width, radius=corner_radius,
-                                      fill=oz_fore_color)
-                draw.rounded_rectangle(tomorrow_part_coords, outline=outline_color, 
-                                       width=outline_width, radius=corner_radius,
-                                      fill=part_fore_color)
-                
-                # add the text
-                draw.text((upper_right_coords[0]+10, upper_right_coords[1]+5), 
-                          'TODAY', font=nasa_font_20, fill=sub_text_col2)
-                draw.text((upper_right_coords[0]+10, upper_right_coords[1]+140), 
-                          'TOMORROW', font=nasa_font_20, fill=sub_text_col2)
-                draw.text((today_ozone_coords[0]+38, today_ozone_coords[1]-20), 
-                          'ozone', font=nasa_font_18, fill=sub_text_col1)
-                draw.text((today_part_coords[0]+10, today_part_coords[1]-20), 
-                          'particulates', font=nasa_font_18, fill=sub_text_col1)
-                draw.text((tomorrow_ozone_coords[0]+38, tomorrow_ozone_coords[1]-20), 
-                          'ozone', font=nasa_font_18, fill=sub_text_col1)
-                draw.text((tomorrow_part_coords[0]+10, tomorrow_part_coords[1]-20), 
-                          'particulates', font=nasa_font_18, fill=sub_text_col1)
-                
             except Exception as exception:
-                err_xloc = upper_right_coords[0]+50
-                err_yloc = upper_right_coords[1]+50
-                draw.text((err_xloc, err_yloc), "ERROR!", font=nasa_font_18, fill = red)
+                draw.line((allergen_xlocs[0]-5, allergen_yloc+45, allergen_xlocs[3]+5, allergen_yloc+45),
+                         fill=red, width=4)
                 print(exception)
                 
+            # place the icons
+            icon_path = "./icons/tree.bmp"
+            tree_7color = Image.open(icon_path)
+            newsize = (40,40)
+            tree_7color = tree_7color.resize(newsize, Image.NEAREST)
+            my_display.paste(tree_7color, (allergen_xlocs[0],allergen_yloc))
+
+            icon_path = "./icons/weed.bmp"
+            weed_7color = Image.open(icon_path)
+            newsize = (40,40)
+            weed_7color = weed_7color.resize(newsize, Image.NEAREST)
+            my_display.paste(weed_7color, (allergen_xlocs[1],allergen_yloc))
+
+            icon_path = "./icons/grass.bmp"
+            grass_7color = Image.open(icon_path)
+            newsize = (40,40)
+            grass_7color = grass_7color.resize(newsize, Image.NEAREST)
+            my_display.paste(grass_7color, (allergen_xlocs[2],allergen_yloc))
+            
+            icon_path = "./icons/mold.bmp"
+            mold_7color = Image.open(icon_path)
+            newsize = (40,40)
+            mold_7color = mold_7color.resize(newsize, Image.NEAREST)
+            my_display.paste(mold_7color, (allergen_xlocs[3],allergen_yloc))
+
+
+            # place the icon color levels
+            draw.text((allergen_xlocs[0]-5, allergen_yloc+50), 
+                        'TREE', font=nasa_font_18, fill=tree_pollen_color,
+                        stroke_width=1, stroke_fill=sub_text_col1)
+            draw.text((allergen_xlocs[1]-5, allergen_yloc+50), 
+                        'WEED', font=nasa_font_18, fill=weed_pollen_color,
+                        stroke_width=1, stroke_fill=sub_text_col1)
+            draw.text((allergen_xlocs[2]-5, allergen_yloc+50), 
+                        'GRASS', font=nasa_font_18, fill=grass_pollen_color,
+                        stroke_width=1, stroke_fill=sub_text_col1)
+            draw.text((allergen_xlocs[3]-5, allergen_yloc+50), 
+                        'MOLD', font=nasa_font_18, fill=mold_spores_color,
+                        stroke_width=1, stroke_fill=sub_text_col1)
+                
+            # place the air quality boxes
+            today_ozone_coords = (upper_right_coords[0]+100, upper_right_coords[1]+25,
+                                    upper_right_coords[0]+235, upper_right_coords[1]+50)
+            today_part_coords = (upper_right_coords[0]+240, upper_right_coords[1]+25,
+                                    upper_right_coords[0]+375, upper_right_coords[1]+50)
+            draw.rounded_rectangle(today_ozone_coords, outline=outline_color, 
+                                    width=outline_width, radius=corner_radius,
+                                    fill=oz_color)
+            draw.rounded_rectangle(today_part_coords, outline=outline_color, 
+                                    width=outline_width, radius=corner_radius,
+                                    fill=part_color)
+
+            tomorrow_ozone_coords = (upper_right_coords[0]+50, upper_right_coords[1]+185,
+                                    upper_right_coords[0]+185, upper_right_coords[1]+210)
+            tomorrow_part_coords = (upper_right_coords[0]+210, upper_right_coords[1]+185,
+                                    upper_right_coords[0]+345, upper_right_coords[1]+210)
+            draw.rounded_rectangle(tomorrow_ozone_coords, outline=outline_color, 
+                                    width=outline_width, radius=corner_radius,
+                                    fill=oz_fore_color)
+            draw.rounded_rectangle(tomorrow_part_coords, outline=outline_color, 
+                                    width=outline_width, radius=corner_radius,
+                                    fill=part_fore_color)
+            
+            # add the text
+            draw.text((upper_right_coords[0]+10, upper_right_coords[1]+5), 
+                        'TODAY', font=nasa_font_20, fill=sub_text_col2)
+            draw.text((upper_right_coords[0]+10, upper_right_coords[1]+140), 
+                        'TOMORROW', font=nasa_font_20, fill=sub_text_col2)
+            draw.text((today_ozone_coords[0]+38, today_ozone_coords[1]-20), 
+                        'ozone', font=nasa_font_18, fill=sub_text_col1)
+            draw.text((today_part_coords[0]+10, today_part_coords[1]-20), 
+                        'particulates', font=nasa_font_18, fill=sub_text_col1)
+            draw.text((tomorrow_ozone_coords[0]+38, tomorrow_ozone_coords[1]-20), 
+                        'ozone', font=nasa_font_18, fill=sub_text_col1)
+            draw.text((tomorrow_part_coords[0]+10, tomorrow_part_coords[1]-20), 
+                        'particulates', font=nasa_font_18, fill=sub_text_col1)
+            
                 
             ## Lower
             try:

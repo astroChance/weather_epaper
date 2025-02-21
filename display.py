@@ -142,6 +142,7 @@ def make_display(debug=debug):
                 newsize = (50,110)
                 thermometer = thermometer.resize(newsize, Image.NEAREST)
                 my_display.paste(thermometer, (25,40))
+                thermometer.close()
 
                 humid_uv_xloc = upper_left_coords[0]+250
                 humid_uv_ylocs = [upper_left_coords[1]+5, upper_left_coords[1]+100]

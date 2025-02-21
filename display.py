@@ -103,6 +103,7 @@ def make_display(debug=debug):
             newsize = (90,90)
             astros_logo = astros_logo.resize(newsize, Image.NEAREST)
             my_display.paste(astros_logo, (355,210))
+            astros_logo.close()
 
             draw.text((210, 0), 'LAUNCHPAD STATUS', font=nasa_font_32, fill=main_text_col)
         
@@ -150,6 +151,7 @@ def make_display(debug=debug):
                 newsize = (40,40)
                 humid_icon = humid_icon.resize(newsize, Image.NEAREST)
                 my_display.paste(humid_icon, (humid_uv_xloc, humid_uv_ylocs[0]+humid_uv_icon_yoffset))
+                humid_icon.close()
                 
                 if round(uvi)<=2:
                     icon_path = "./icons/uv_low.bmp"
@@ -165,6 +167,7 @@ def make_display(debug=debug):
                 newsize = (40,40)
                 uv_icon = uv_icon.resize(newsize, Image.NEAREST)
                 my_display.paste(uv_icon, (humid_uv_xloc, humid_uv_ylocs[1]+humid_uv_icon_yoffset))
+                uv_icon.close()
 
                 ## Current temperature
                 display_curr_temp = str(round(temp_f))
@@ -181,6 +184,7 @@ def make_display(debug=debug):
                 newsize = (100,100)
                 condition_icon = condition_icon.resize(newsize, Image.NEAREST)
                 my_display.paste(condition_icon, (condition_xloc, condition_yloc))
+                condition_icon.close()
 
 
                 ## Current humidity
@@ -250,24 +254,28 @@ def make_display(debug=debug):
             newsize = (40,40)
             tree_7color = tree_7color.resize(newsize, Image.NEAREST)
             my_display.paste(tree_7color, (allergen_xlocs[0],allergen_yloc))
+            tree_7color.close()
 
             icon_path = "./icons/weed.bmp"
             weed_7color = Image.open(icon_path)
             newsize = (40,40)
             weed_7color = weed_7color.resize(newsize, Image.NEAREST)
             my_display.paste(weed_7color, (allergen_xlocs[1],allergen_yloc))
+            weed_7color.close()
 
             icon_path = "./icons/grass.bmp"
             grass_7color = Image.open(icon_path)
             newsize = (40,40)
             grass_7color = grass_7color.resize(newsize, Image.NEAREST)
             my_display.paste(grass_7color, (allergen_xlocs[2],allergen_yloc))
+            grass_7color.close()
             
             icon_path = "./icons/mold.bmp"
             mold_7color = Image.open(icon_path)
             newsize = (40,40)
             mold_7color = mold_7color.resize(newsize, Image.NEAREST)
             my_display.paste(mold_7color, (allergen_xlocs[3],allergen_yloc))
+            mold_7color.close()
 
 
             # place the icon color levels
@@ -358,6 +366,7 @@ def make_display(debug=debug):
                     newsize = (30,30)
                     condition_icon = condition_icon.resize(newsize, Image.NEAREST)
                     my_display.paste(condition_icon, (hourly_xloc, hourly_yloc+130))
+                    condition_icon.close()
 
                     hourly_xloc = hourly_xloc + x_bump
                     
@@ -385,6 +394,7 @@ def make_display(debug=debug):
                     newsize = (45,45)
                     condition_icon = condition_icon.resize(newsize, Image.NEAREST)
                     my_display.paste(condition_icon, (daily_xloc, daily_yloc+160))
+                    condition_icon.close()
 
                     daily_xloc = daily_xloc + x_bump
                 

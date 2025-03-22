@@ -373,6 +373,8 @@ def get_pollen_data():
         tmp_data = str(i)[37:].replace("</strong><br/><strong>", " ").split()
         pollen_type = ' '.join([tmp_data[0], tmp_data[1]])
         pollen_level = tmp_data[2]
+        if tmp_data[3].lower() == "heavy": #needed for houston
+            pollen_level = "extremely heavy"
         pollen_type = pollen_type.replace("<br/>", "")
         pollen_level = pollen_level.replace("<br/>", "")
         pollen_data[pollen_type] = pollen_level

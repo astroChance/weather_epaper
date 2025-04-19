@@ -159,8 +159,8 @@ def get_aq_current(airnow_api_key, zipcode="77008"):
     payload["zipCode"] = zipcode
     payload["format"] = "JSON"
     payload["api_key"] = airnow_api_key
-    response = requests.get(airnow_host+airnow_zipsite_current, params=payload)
-    return response
+    with requests.get(airnow_host+airnow_zipsite_current, params=payload) as response:
+        return response
 
 def get_ozone_current(**kwargs):
     """
@@ -230,8 +230,8 @@ def get_aq_tomorrow(airnow_api_key, zipcode="77008"):
     payload["zipCode"] = zipcode
     payload["format"] = "JSON"
     payload["api_key"] = airnow_api_key
-    response = requests.get(airnow_host+airnow_zipsite_forecast, params=payload)
-    return response
+    with requests.get(airnow_host+airnow_zipsite_forecast, params=payload) as response:
+        return response
 
 def get_ozone_forecast(**kwargs):
     """
@@ -367,6 +367,7 @@ def get_pollen_data():
     
     soup = BeautifulSoup(page.content, "html.parser")
     tmp = soup.find_all("p", class_="text-align-center")
+    page.close()
     
     pollen_data = {}
     for i in tmp:
@@ -396,8 +397,8 @@ def get_weather(weather_api_key, latitude, longitude):
     lat_str = "lat="+latitude
     long_str = "&lon="+longitude
     api_str = "&appid="+weather_api_key
-    response = requests.get(base+lat_str+long_str+api_str)
-    return response
+    with requests.get(base+lat_str+long_str+api_str) as response:
+        return response
 
 def kelvin_to_farenheit(temp_K):
     """

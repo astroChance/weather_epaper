@@ -110,7 +110,9 @@ def uvi_color(uvi, debug=False):
 ## Current weather icons based on weather id
 curr_weather_icons = {
     "clear": "./icons/sun.bmp",
+    "clear_night": "./icons/night.bmp",
     "partly cloudy": "./icons/partly_cloudy.bmp",
+    "partly cloudy night": "./icons/partly_cloudy_night.bmp",
     "mostly cloudy": "./icons/mostly_cloudy.bmp",
     "light rain": "./icons/light_rain.bmp",
     "rain": "./icons/rain.bmp",
@@ -119,10 +121,13 @@ curr_weather_icons = {
     "atmospheric": "./icons/atm.bmp",
 }
 
-def get_condition_icon(id):
+def get_condition_icon(id, is_daytime):
     id = str(id)
     if id == "800":
-        icon  = curr_weather_icons["clear"]
+        if is_daytime:
+            icon  = curr_weather_icons["clear"]
+        else:
+            icon  = curr_weather_icons["clear_night"]
     elif id.startswith("2"):
         icon  = curr_weather_icons["thunderstorm"]
     elif id.startswith("3"):
@@ -134,7 +139,10 @@ def get_condition_icon(id):
     elif id.startswith("7"):
         icon  = curr_weather_icons["atmospheric"]
     elif id in ["801", "802"]:
-        icon  = curr_weather_icons["partly cloudy"]
+        if is_daytime:
+            icon  = curr_weather_icons["partly cloudy"]
+        else:
+            icon  = curr_weather_icons["partly cloudy night"]
     elif id in ["803", "804"]:
         icon  = curr_weather_icons["mostly cloudy"]
     return icon
@@ -424,13 +432,14 @@ def current_conditions(response):
     """
     Return the current 'feels like' temperature
     in degrees F, current humidity, current
-    UVI, and current condition id
+    UVI, current condition id, and day[true] night[false]
     """
     conditions = {}
     conditions["temp_f"] = None
     conditions["humidity"] = None
     conditions["uvi"] = None
     conditions["id"] = None
+    conditions["daytime"] = False
     try:
         resp = json.loads(response.text)
     except:
@@ -443,6 +452,9 @@ def current_conditions(response):
     uvi = resp['current']['uvi']
 
     id = resp["current"]["weather"][0]["id"]
+
+    if resp["current"]["sunrise"] < resp["current"]["dt"] < resp["current"]["sunset"]:
+        conditions["daytime"] = True
 
     conditions["temp_f"] = temp_f
     conditions["humidity"] = humidity

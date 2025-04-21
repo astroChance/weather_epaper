@@ -141,6 +141,7 @@ def make_display(debug=debug):
                 humidity = weather_data["current"]["humidity"]
                 uvi = weather_data["current"]["uvi"]
                 weather_id = weather_data["current"]["id"]
+                is_daytime = weather_data["current"]["daytime"]
                 curr_uvi_color = uvi_color(uvi, debug=debug)
                 
                 ## Icons
@@ -192,7 +193,7 @@ def make_display(debug=debug):
                 ## Current conditions
                 condition_xloc = upper_left_coords[0]+120
                 condition_yloc = upper_left_coords[1]+40
-                current_condition_icon = get_condition_icon(weather_id)
+                current_condition_icon = get_condition_icon(weather_id, is_daytime)
                 condition_icon = Image.open(current_condition_icon)
                 newsize = (100,100)
                 condition_icon = condition_icon.resize(newsize, Image.NEAREST)
@@ -377,7 +378,7 @@ def make_display(debug=debug):
                     draw.text((hourly_xloc, hourly_yloc+90), 
                           str(temp)+'\N{DEGREE SIGN}', font=nasa_font_18, fill=sub_text_col1)
                     
-                    condition_icon = Image.open(get_condition_icon(id))
+                    condition_icon = Image.open(get_condition_icon(id, is_daytime))
                     newsize = (30,30)
                     condition_icon = condition_icon.resize(newsize, Image.NEAREST)
                     my_display.paste(condition_icon, (hourly_xloc, hourly_yloc+130))
@@ -405,7 +406,7 @@ def make_display(debug=debug):
                     draw.text((daily_xloc, daily_yloc+120), 
                           str(min_temp)+'\N{DEGREE SIGN}', font=nasa_font_18, fill=sub_text_col1)
 
-                    condition_icon = Image.open(get_condition_icon(id))
+                    condition_icon = Image.open(get_condition_icon(id, is_daytime))
                     newsize = (45,45)
                     condition_icon = condition_icon.resize(newsize, Image.NEAREST)
                     my_display.paste(condition_icon, (daily_xloc, daily_yloc+160))

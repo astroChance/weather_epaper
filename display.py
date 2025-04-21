@@ -1,9 +1,13 @@
+#!/usr/bin/env python3
+
 from PIL import Image,ImageDraw,ImageFont
 from dashboard_data import *
 import time
 import schedule
 from datetime import datetime
 import requests
+import logging
+from logging.handlers import RotatingFileHandler
 
 
 ##~~~~~~~~~~~~~~~~~
@@ -69,6 +73,14 @@ lower_coords = (5,260,795,475)
 ## API parameters
 heights_lat = "29.8068"
 heights_long = "-95.4181"
+
+## log setup
+logpath = "./logfile"
+logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S',
+                    level=logging.DEBUG,
+                    handlers=[RotatingFileHandler(logpath, maxBytes=20000, 
+                                                  backupCount=1)])
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -213,6 +225,7 @@ def make_display(debug=debug):
                 err_yloc = upper_left_coords[1]+50
                 draw.text((err_xloc, err_yloc), "ERROR!", font=nasa_font_18, fill = red)
                 print(exception)
+                logging.exception("FAIL")
                 
                 
             ## Upper right
@@ -248,6 +261,7 @@ def make_display(debug=debug):
                 draw.line((allergen_xlocs[0]-5, allergen_yloc+45, allergen_xlocs[3]+5, allergen_yloc+45),
                          fill=red, width=4)
                 print(exception)
+                logging.exception("FAIL")
                 
             # place the icons
             icon_path = "./icons/tree.bmp"
@@ -404,6 +418,7 @@ def make_display(debug=debug):
                 err_yloc = lower_coords[1]+50
                 draw.text((err_xloc, err_yloc), "ERROR!", font=nasa_font_18, fill = red)
                 print(exception)
+                logging.exception("FAIL")
             
             
             ##~~~~~~~~~~~~~
@@ -415,6 +430,7 @@ def make_display(debug=debug):
                 print("successful update at: ", datetime.now())
             
         except Exception as exception:
+            logging.exception("FAIL")
             err_display = Image.new("RGB", (epd_width, epd_height), white)
             draw = ImageDraw.Draw(err_display)
             draw.text((369,240), "ERROR!", font=nasa_font_28, fill = red)
@@ -428,6 +444,7 @@ def make_display(debug=debug):
             print(exception)
         
     except (requests.ConnectionError, requests.Timeout) as exception:
+        logging.exception("FAIL")
         err_display = Image.new("RGB", (epd_width, epd_height), white)
         draw = ImageDraw.Draw(err_display)
         draw.text((369,240), "ERROR!", font=nasa_font_28, fill = red)
@@ -452,23 +469,30 @@ def clear_and_pause(pause_time = 25200):
     print("daily pause...")
     time.sleep(pause_time)
     
-if debug:
-    debug_img = make_display(debug=debug)
-    debug_img.save(debug_save_location, quality=100, subsampling=0)
-else:
-    try:
-        make_display(debug=debug)
-        schedule.every().hour.at(":00").do(make_display)
-        schedule.every().hour.at(":30").do(make_display)
-        schedule.every().day.at("23:00").do(clear_and_pause)
-        while True:
-            schedule.run_pending()
-            time.sleep(1)
-    except KeyboardInterrupt:
-        epd.Clear()
-        epaper.epaper(epap_model).epdconfig.module_exit(cleanup=True)
-        
-    except Exception as exception:
-        print(exception)
-        epd.init()
-        epd.Clear()
+
+def weather_display():
+    if debug:
+        debug_img = make_display(debug=debug)
+        debug_img.save(debug_save_location, quality=100, subsampling=0)
+    else:
+        try:
+            make_display(debug=debug)
+            schedule.every().hour.at(":00").do(make_display)
+            schedule.every().hour.at(":30").do(make_display)
+            schedule.every().day.at("23:00").do(clear_and_pause)
+            while True:
+                schedule.run_pending()
+                time.sleep(1)
+        except KeyboardInterrupt:
+            epd.Clear()
+            epaper.epaper(epap_model).epdconfig.module_exit(cleanup=True)
+            
+        except Exception as exception:
+            logging.exception("FAIL")
+            print(exception)
+            epd.init()
+            epd.Clear()
+
+
+if __name__ == "__main__":
+    weather_display()

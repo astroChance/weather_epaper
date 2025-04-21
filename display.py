@@ -18,7 +18,7 @@ from logging.handlers import RotatingFileHandler
 ## Note epaper libraries are only available on linux, so 
 ## calls to epaper/epd will only happen in debug=False
 
-debug = True
+debug = False
 debug_save_location = "./debug_img.jpg"
 
 ##~~~~~~~~~~~~~~~~~

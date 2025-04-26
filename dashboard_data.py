@@ -121,10 +121,10 @@ curr_weather_icons = {
     "atmospheric": "./icons/atm.bmp",
 }
 
-def get_condition_icon(id, is_daytime):
+def get_condition_icon(id, is_daytime, daily=False):
     id = str(id)
     if id == "800":
-        if is_daytime:
+        if is_daytime or daily:
             icon  = curr_weather_icons["clear"]
         else:
             icon  = curr_weather_icons["clear_night"]
@@ -139,7 +139,7 @@ def get_condition_icon(id, is_daytime):
     elif id.startswith("7"):
         icon  = curr_weather_icons["atmospheric"]
     elif id in ["801", "802"]:
-        if is_daytime:
+        if is_daytime or daily:
             icon  = curr_weather_icons["partly cloudy"]
         else:
             icon  = curr_weather_icons["partly cloudy night"]

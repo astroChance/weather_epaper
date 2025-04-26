@@ -406,7 +406,7 @@ def make_display(debug=debug):
                     draw.text((daily_xloc, daily_yloc+120), 
                           str(min_temp)+'\N{DEGREE SIGN}', font=nasa_font_18, fill=sub_text_col1)
 
-                    condition_icon = Image.open(get_condition_icon(id, is_daytime))
+                    condition_icon = Image.open(get_condition_icon(id, is_daytime, daily=True))
                     newsize = (45,45)
                     condition_icon = condition_icon.resize(newsize, Image.NEAREST)
                     my_display.paste(condition_icon, (daily_xloc, daily_yloc+160))

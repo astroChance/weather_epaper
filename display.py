@@ -429,6 +429,7 @@ def make_display(debug=debug):
             else:
                 epd.display(epd.getbuffer(my_display))
                 print("successful update at: ", datetime.now())
+                my_display.close()
             
         except Exception as exception:
             logging.exception("FAIL")
@@ -443,6 +444,7 @@ def make_display(debug=debug):
                 epd.Clear()
                 epd.display(epd.getbuffer(err_display))
             print(exception)
+            err_display.close()
         
     except (requests.ConnectionError, requests.Timeout) as exception:
         logging.exception("FAIL")
@@ -457,6 +459,7 @@ def make_display(debug=debug):
             epd.Clear()
             epd.display(epd.getbuffer(err_display))
         print(exception)
+        err_display.close()
         
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

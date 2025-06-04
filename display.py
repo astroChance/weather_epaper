@@ -90,7 +90,10 @@ def make_display(debug=debug):
         ## Check internet connection
         url = "http://www.google.com"
         timeout = 5
-        request = requests.get(url, timeout=timeout)
+        session = requests.Session()
+        with session.get(url, timeout=timeout) as response:
+            pass
+        session.close()
         
         try:
             ## Draw canvas
@@ -111,11 +114,10 @@ def make_display(debug=debug):
             
             ## PIZZAZZ
             icon_path = "./icons/astros.bmp"
-            astros_logo = Image.open(icon_path)
-            newsize = (90,90)
-            astros_logo = astros_logo.resize(newsize, Image.NEAREST)
-            my_display.paste(astros_logo, (355,210))
-            astros_logo.close()
+            with Image.open(icon_path) as astros_logo:
+                newsize = (90,90)
+                astros_logo = astros_logo.resize(newsize, Image.NEAREST)
+                my_display.paste(astros_logo, (355,210))
 
             draw.text((210, 0), 'LAUNCHPAD STATUS', font=nasa_font_32, fill=main_text_col)
         
@@ -151,21 +153,19 @@ def make_display(debug=debug):
                     icon_path = "./icons/thermo_low.bmp"
                 else:
                     icon_path = "./icons/thermo_mid.bmp"
-                thermometer = Image.open(icon_path)
-                newsize = (50,110)
-                thermometer = thermometer.resize(newsize, Image.NEAREST)
-                my_display.paste(thermometer, (25,40))
-                thermometer.close()
+                with Image.open(icon_path) as thermometer:
+                    newsize = (50,110)
+                    thermometer = thermometer.resize(newsize, Image.NEAREST)
+                    my_display.paste(thermometer, (25,40))
 
                 humid_uv_xloc = upper_left_coords[0]+250
                 humid_uv_ylocs = [upper_left_coords[1]+5, upper_left_coords[1]+100]
                 humid_uv_icon_yoffset = 35
                 icon_path = "./icons/humidity.bmp"
-                humid_icon = Image.open(icon_path)
-                newsize = (40,40)
-                humid_icon = humid_icon.resize(newsize, Image.NEAREST)
-                my_display.paste(humid_icon, (humid_uv_xloc, humid_uv_ylocs[0]+humid_uv_icon_yoffset))
-                humid_icon.close()
+                with Image.open(icon_path) as humid_icon:
+                    newsize = (40,40)
+                    humid_icon = humid_icon.resize(newsize, Image.NEAREST)
+                    my_display.paste(humid_icon, (humid_uv_xloc, humid_uv_ylocs[0]+humid_uv_icon_yoffset))
                 
                 if round(uvi)<=2:
                     icon_path = "./icons/uv_low.bmp"
@@ -177,11 +177,10 @@ def make_display(debug=debug):
                     icon_path = "./icons/uv_high.bmp"
                 else:
                     icon_path = "./icons/uv.bmp"
-                uv_icon = Image.open(icon_path)
-                newsize = (40,40)
-                uv_icon = uv_icon.resize(newsize, Image.NEAREST)
-                my_display.paste(uv_icon, (humid_uv_xloc, humid_uv_ylocs[1]+humid_uv_icon_yoffset))
-                uv_icon.close()
+                with Image.open(icon_path) as uv_icon:
+                    newsize = (40,40)
+                    uv_icon = uv_icon.resize(newsize, Image.NEAREST)
+                    my_display.paste(uv_icon, (humid_uv_xloc, humid_uv_ylocs[1]+humid_uv_icon_yoffset))
 
                 ## Current temperature
                 display_curr_temp = str(round(temp_f))
@@ -194,11 +193,10 @@ def make_display(debug=debug):
                 condition_xloc = upper_left_coords[0]+120
                 condition_yloc = upper_left_coords[1]+40
                 current_condition_icon = get_condition_icon(weather_id, is_daytime)
-                condition_icon = Image.open(current_condition_icon)
-                newsize = (100,100)
-                condition_icon = condition_icon.resize(newsize, Image.NEAREST)
-                my_display.paste(condition_icon, (condition_xloc, condition_yloc))
-                condition_icon.close()
+                with Image.open(current_condition_icon) as condition_icon:
+                    newsize = (100,100)
+                    condition_icon = condition_icon.resize(newsize, Image.NEAREST)
+                    my_display.paste(condition_icon, (condition_xloc, condition_yloc))
 
 
                 ## Current humidity
@@ -226,7 +224,7 @@ def make_display(debug=debug):
                 err_yloc = upper_left_coords[1]+50
                 draw.text((err_xloc, err_yloc), "ERROR!", font=nasa_font_18, fill = red)
                 print(exception)
-                logging.exception("FAIL")
+                logging.exception("FAIL in current conditions section")
                 
                 
             ## Upper right
@@ -262,36 +260,32 @@ def make_display(debug=debug):
                 draw.line((allergen_xlocs[0]-5, allergen_yloc+45, allergen_xlocs[3]+5, allergen_yloc+45),
                          fill=red, width=4)
                 print(exception)
-                logging.exception("FAIL")
+                logging.exception("FAIL in pollen section")
                 
             # place the icons
             icon_path = "./icons/tree.bmp"
-            tree_7color = Image.open(icon_path)
-            newsize = (40,40)
-            tree_7color = tree_7color.resize(newsize, Image.NEAREST)
-            my_display.paste(tree_7color, (allergen_xlocs[0],allergen_yloc))
-            tree_7color.close()
+            with Image.open(icon_path) as tree_7color:
+                newsize = (40,40)
+                tree_7color = tree_7color.resize(newsize, Image.NEAREST)
+                my_display.paste(tree_7color, (allergen_xlocs[0],allergen_yloc))
 
             icon_path = "./icons/weed.bmp"
-            weed_7color = Image.open(icon_path)
-            newsize = (40,40)
-            weed_7color = weed_7color.resize(newsize, Image.NEAREST)
-            my_display.paste(weed_7color, (allergen_xlocs[1],allergen_yloc))
-            weed_7color.close()
+            with Image.open(icon_path) as weed_7color:
+                newsize = (40,40)
+                weed_7color = weed_7color.resize(newsize, Image.NEAREST)
+                my_display.paste(weed_7color, (allergen_xlocs[1],allergen_yloc))
 
             icon_path = "./icons/grass.bmp"
-            grass_7color = Image.open(icon_path)
-            newsize = (40,40)
-            grass_7color = grass_7color.resize(newsize, Image.NEAREST)
-            my_display.paste(grass_7color, (allergen_xlocs[2],allergen_yloc))
-            grass_7color.close()
+            with Image.open(icon_path) as grass_7color:
+                newsize = (40,40)
+                grass_7color = grass_7color.resize(newsize, Image.NEAREST)
+                my_display.paste(grass_7color, (allergen_xlocs[2],allergen_yloc))
             
             icon_path = "./icons/mold.bmp"
-            mold_7color = Image.open(icon_path)
-            newsize = (40,40)
-            mold_7color = mold_7color.resize(newsize, Image.NEAREST)
-            my_display.paste(mold_7color, (allergen_xlocs[3],allergen_yloc))
-            mold_7color.close()
+            with Image.open(icon_path) as mold_7color:
+                newsize = (40,40)
+                mold_7color = mold_7color.resize(newsize, Image.NEAREST)
+                my_display.paste(mold_7color, (allergen_xlocs[3],allergen_yloc))
 
 
             # place the icon color levels
@@ -378,11 +372,10 @@ def make_display(debug=debug):
                     draw.text((hourly_xloc, hourly_yloc+90), 
                           str(temp)+'\N{DEGREE SIGN}', font=nasa_font_18, fill=sub_text_col1)
                     
-                    condition_icon = Image.open(get_condition_icon(id, is_daytime))
-                    newsize = (30,30)
-                    condition_icon = condition_icon.resize(newsize, Image.NEAREST)
-                    my_display.paste(condition_icon, (hourly_xloc, hourly_yloc+130))
-                    condition_icon.close()
+                    with Image.open(get_condition_icon(id, is_daytime)) as condition_icon:
+                        newsize = (30,30)
+                        condition_icon = condition_icon.resize(newsize, Image.NEAREST)
+                        my_display.paste(condition_icon, (hourly_xloc, hourly_yloc+130))
 
                     hourly_xloc = hourly_xloc + x_bump
                     
@@ -406,11 +399,10 @@ def make_display(debug=debug):
                     draw.text((daily_xloc, daily_yloc+120), 
                           str(min_temp)+'\N{DEGREE SIGN}', font=nasa_font_18, fill=sub_text_col1)
 
-                    condition_icon = Image.open(get_condition_icon(id, is_daytime, daily=True))
-                    newsize = (45,45)
-                    condition_icon = condition_icon.resize(newsize, Image.NEAREST)
-                    my_display.paste(condition_icon, (daily_xloc, daily_yloc+160))
-                    condition_icon.close()
+                    with Image.open(get_condition_icon(id, is_daytime, daily=True)) as condition_icon:
+                        newsize = (45,45)
+                        condition_icon = condition_icon.resize(newsize, Image.NEAREST)
+                        my_display.paste(condition_icon, (daily_xloc, daily_yloc+160))
 
                     daily_xloc = daily_xloc + x_bump
                 
@@ -419,7 +411,7 @@ def make_display(debug=debug):
                 err_yloc = lower_coords[1]+50
                 draw.text((err_xloc, err_yloc), "ERROR!", font=nasa_font_18, fill = red)
                 print(exception)
-                logging.exception("FAIL")
+                logging.exception("FAIL in daily/hourly section")
             
             
             ##~~~~~~~~~~~~~
@@ -432,7 +424,7 @@ def make_display(debug=debug):
                 my_display.close()
             
         except Exception as exception:
-            logging.exception("FAIL")
+            logging.exception("FAIL in canvas or data transfer")
             err_display = Image.new("RGB", (epd_width, epd_height), white)
             draw = ImageDraw.Draw(err_display)
             draw.text((369,240), "ERROR!", font=nasa_font_28, fill = red)
@@ -447,7 +439,7 @@ def make_display(debug=debug):
             err_display.close()
         
     except (requests.ConnectionError, requests.Timeout) as exception:
-        logging.exception("FAIL")
+        logging.exception("FAIL in internet connection test")
         err_display = Image.new("RGB", (epd_width, epd_height), white)
         draw = ImageDraw.Draw(err_display)
         draw.text((369,240), "ERROR!", font=nasa_font_28, fill = red)
@@ -492,7 +484,7 @@ def weather_display():
             epaper.epaper(epap_model).epdconfig.module_exit(cleanup=True)
             
         except Exception as exception:
-            logging.exception("FAIL")
+            logging.exception("FAIL in main function")
             print(exception)
             epd.init()
             epd.Clear()

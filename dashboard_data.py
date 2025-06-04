@@ -168,7 +168,10 @@ def get_aq_current(airnow_api_key, zipcode="77008"):
     payload["format"] = "JSON"
     payload["api_key"] = airnow_api_key
     with requests.get(airnow_host+airnow_zipsite_current, params=payload) as response:
-        return response
+        try:
+            return response
+        finally:
+            response.close()
 
 def get_ozone_current(**kwargs):
     """
@@ -239,7 +242,10 @@ def get_aq_tomorrow(airnow_api_key, zipcode="77008"):
     payload["format"] = "JSON"
     payload["api_key"] = airnow_api_key
     with requests.get(airnow_host+airnow_zipsite_forecast, params=payload) as response:
-        return response
+        try:
+            return response
+        finally:
+            response.close()
 
 def get_ozone_forecast(**kwargs):
     """
@@ -406,7 +412,10 @@ def get_weather(weather_api_key, latitude, longitude):
     long_str = "&lon="+longitude
     api_str = "&appid="+weather_api_key
     with requests.get(base+lat_str+long_str+api_str) as response:
-        return response
+        try:
+            return response
+        finally:
+            response.close()
 
 def kelvin_to_farenheit(temp_K):
     """

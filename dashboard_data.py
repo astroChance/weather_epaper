@@ -167,7 +167,7 @@ def get_aq_current(airnow_api_key, zipcode="77008"):
     payload["zipCode"] = zipcode
     payload["format"] = "JSON"
     payload["api_key"] = airnow_api_key
-    with requests.get(airnow_host+airnow_zipsite_current, params=payload) as response:
+    with requests.get(airnow_host+airnow_zipsite_current, params=payload, timeout=5) as response:
         try:
             return response
         finally:
@@ -241,7 +241,7 @@ def get_aq_tomorrow(airnow_api_key, zipcode="77008"):
     payload["zipCode"] = zipcode
     payload["format"] = "JSON"
     payload["api_key"] = airnow_api_key
-    with requests.get(airnow_host+airnow_zipsite_forecast, params=payload) as response:
+    with requests.get(airnow_host+airnow_zipsite_forecast, params=payload, timeout=5) as response:
         try:
             return response
         finally:
@@ -353,13 +353,13 @@ def get_pollen_data():
     payload_addition = make_payload_addition()
     payload = payload_base+payload_addition
     url = url_base + payload
-    page = requests.get(url)
+    page = requests.get(url, timeout=5)
 
     if page.status_code == 404:
         payload_addition = make_payload_addition(use_yesterday=True)
         payload = payload_base+payload_addition
         url = url_base + payload
-        page = requests.get(url)
+        page = requests.get(url, timeout=5)
 
         if page.status_code == 404:
             ## because they fat finger the second hyphen
@@ -368,7 +368,7 @@ def get_pollen_data():
             payload_addition = payload_addition[:idx] + payload_addition[idx+1:]
             payload = payload_base+payload_addition
             url = url_base + payload
-            page = requests.get(url)
+            page = requests.get(url, timeout=5)
 
             if page.status_code == 404:
                 ## because they fat finger the second hyphen
@@ -377,7 +377,7 @@ def get_pollen_data():
                 payload_addition = payload_addition[:idx] + payload_addition[idx+1:]
                 payload = payload_base+payload_addition
                 url = url_base + payload
-                page = requests.get(url)
+                page = requests.get(url, timeout=5)
     
     soup = BeautifulSoup(page.content, "html.parser")
     tmp = soup.find_all("p", class_="text-align-center")
@@ -411,7 +411,7 @@ def get_weather(weather_api_key, latitude, longitude):
     lat_str = "lat="+latitude
     long_str = "&lon="+longitude
     api_str = "&appid="+weather_api_key
-    with requests.get(base+lat_str+long_str+api_str) as response:
+    with requests.get(base+lat_str+long_str+api_str, timeout=5) as response:
         try:
             return response
         finally:

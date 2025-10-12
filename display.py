@@ -14,11 +14,11 @@ from logging.handlers import RotatingFileHandler
 ## SET DEBUG MODE
 ## If set to True, will write image to specified directory
 ## If set to False, will send image to epaper
-
+ 
 ## Note epaper libraries are only available on linux, so 
 ## calls to epaper/epd will only happen in debug=False
 
-debug = False
+debug = True
 debug_save_location = "./debug_img.jpg"
 
 ##~~~~~~~~~~~~~~~~~
@@ -414,14 +414,51 @@ def make_display(debug=debug):
                 logging.exception("FAIL in daily/hourly section")
             
             
+            ## Cleanup variables in attempt to fix OOM error
+            ## Result: this doesn't hurt, but the error was more
+            ## likely related to URL connection timeout
+            del_list = [url, timeout, session, icon_path, newsize,
+                        astros_logo, update_date, update_time,
+                        weather_data, temp_f, humidity, uvi, weather_id,
+                        is_daytime, curr_uvi_color, thermometer, 
+                        humid_uv_xloc, humid_uv_ylocs, humid_uv_icon_yoffset,
+                        humid_icon, uv_icon, display_curr_temp,
+                        condition_xloc, condition_yloc, current_condition_icon,
+                        condition_icon, humid_uv_val_xoffset, humid_uv_val_yoffset,
+                        display_curr_humidity, display_curr_uvi, 
+                        tree_pollen_color, weed_pollen_color, grass_pollen_color,
+                        mold_spores_color, oz_color, part_color, oz_fore_color,
+                        part_fore_color, allergen_xlocs, allergen_yloc,
+                        pollen_data, oz_code, oz_fore_code, oz_lev, oz_fore_lev,
+                        oz_val, part_code, part_fore_code, part_lev, part_fore_lev,
+                        part_val,tree_7color, weed_7color, grass_7color, mold_7color,
+                        today_ozone_coords, today_part_coords, tomorrow_ozone_coords,
+                        tomorrow_part_coords, center_x, box_top, box_bottom, hourly_xloc,
+                        hourly_yloc, x_bump, day, max_temp, min_temp, id, condition_icon,
+                        daily_xloc]
+            
+            for d in del_list:
+                try:
+                    del d
+                except:
+                    pass
+
             ##~~~~~~~~~~~~~
             ## SEND DATA
             if debug:
-                return my_display
+                try:
+                    return my_display
+                finally:
+                    del my_display
+                    del draw
             else:
                 epd.display(epd.getbuffer(my_display))
                 print("successful update at: ", datetime.now())
                 my_display.close()
+
+                # cleanup to address OOM error
+                del my_display
+                del draw
             
         except Exception as exception:
             logging.exception("FAIL in canvas or data transfer")
@@ -468,8 +505,69 @@ def clear_and_pause(pause_time = 25200):
 
 def weather_display():
     if debug:
+        ## Running three times to ensure no resource leakage
+        ## Current test suggests issue is resolved Oct 12th 2025
+        import gc
+        obs1 = gc.get_objects()
+        print(f"\nObs 1: {len(obs1)}")
+        del obs1
+
         debug_img = make_display(debug=debug)
         debug_img.save(debug_save_location, quality=100, subsampling=0)
+        debug_img.close()
+        del debug_img
+
+        obs2 = gc.get_objects()
+        print(f"Obs 2: {len(obs2)}")
+        del obs2
+
+        gc.collect()
+        obs3 = gc.get_objects()
+        print(f"Obs 3: {len(obs3)}")
+        del obs3
+
+        print("\n~~Second Run~~")
+        time.sleep(1)
+
+        obs1 = gc.get_objects()
+        print(f"Obs 1: {len(obs1)}")
+        del obs1
+
+        debug_img = make_display(debug=debug)
+        debug_img.save(debug_save_location, quality=100, subsampling=0)
+        debug_img.close()
+        del debug_img
+
+        obs2 = gc.get_objects()
+        print(f"Obs 2: {len(obs2)}")
+        del obs2
+
+        gc.collect()
+        obs3 = gc.get_objects()
+        print(f"Obs 3: {len(obs3)}")
+        del obs3
+
+        print("\n~~Third Run~~")
+        time.sleep(1)
+
+        obs1 = gc.get_objects()
+        print(f"Obs 1: {len(obs1)}")
+        del obs1
+
+        debug_img = make_display(debug=debug)
+        debug_img.save(debug_save_location, quality=100, subsampling=0)
+        debug_img.close()
+        del debug_img
+
+        obs2 = gc.get_objects()
+        print(f"Obs 2: {len(obs2)}")
+        del obs2
+
+        gc.collect()
+        obs3 = gc.get_objects()
+        print(f"Obs 3: {len(obs3)}")
+        del obs3
+
     else:
         try:
             make_display(debug=debug)

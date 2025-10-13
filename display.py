@@ -247,14 +247,11 @@ def make_display(debug=debug):
                 grass_pollen_color = pollen_color(pollen_data["GRASS POLLEN"], debug=debug)
                 mold_spores_color = pollen_color(pollen_data["MOLD SPORES"], debug=debug)
                 
-                oz_val, oz_lev, oz_code = get_ozone_current(airnow_api_key=airnow_api_key)
-                part_val, part_lev, part_code = get_particulate_current(airnow_api_key=airnow_api_key)
-                oz_fore_lev, oz_fore_code = get_ozone_forecast(airnow_api_key=airnow_api_key)
-                part_fore_lev, part_fore_code = get_particulate_forecast(airnow_api_key=airnow_api_key)
-                oz_color = aq_color(oz_code, debug=debug)
-                part_color = aq_color(part_code, debug=debug)
-                oz_fore_color = aq_color(oz_fore_code, debug=debug)
-                part_fore_color = aq_color(part_fore_code, debug=debug)
+                air_quality = get_air_quality(airnow_api_key=airnow_api_key)
+                oz_color = aq_color(air_quality["ozone_code_current"], debug=debug)
+                part_color = aq_color(air_quality["part_code_current"], debug=debug)
+                oz_fore_color = aq_color(air_quality["ozone_code_fore"], debug=debug)
+                part_fore_color = aq_color(air_quality["part_code_fore"], debug=debug)
 
             except Exception as exception:
                 draw.line((allergen_xlocs[0]-5, allergen_yloc+45, allergen_xlocs[3]+5, allergen_yloc+45),
@@ -413,35 +410,6 @@ def make_display(debug=debug):
                 print(exception)
                 logging.exception("FAIL in daily/hourly section")
             
-            
-            ## Cleanup variables in attempt to fix OOM error
-            ## Result: this doesn't hurt, but the error was more
-            ## likely related to URL connection timeout
-            del_list = [url, timeout, session, icon_path, newsize,
-                        astros_logo, update_date, update_time,
-                        weather_data, temp_f, humidity, uvi, weather_id,
-                        is_daytime, curr_uvi_color, thermometer, 
-                        humid_uv_xloc, humid_uv_ylocs, humid_uv_icon_yoffset,
-                        humid_icon, uv_icon, display_curr_temp,
-                        condition_xloc, condition_yloc, current_condition_icon,
-                        condition_icon, humid_uv_val_xoffset, humid_uv_val_yoffset,
-                        display_curr_humidity, display_curr_uvi, 
-                        tree_pollen_color, weed_pollen_color, grass_pollen_color,
-                        mold_spores_color, oz_color, part_color, oz_fore_color,
-                        part_fore_color, allergen_xlocs, allergen_yloc,
-                        pollen_data, oz_code, oz_fore_code, oz_lev, oz_fore_lev,
-                        oz_val, part_code, part_fore_code, part_lev, part_fore_lev,
-                        part_val,tree_7color, weed_7color, grass_7color, mold_7color,
-                        today_ozone_coords, today_part_coords, tomorrow_ozone_coords,
-                        tomorrow_part_coords, center_x, box_top, box_bottom, hourly_xloc,
-                        hourly_yloc, x_bump, day, max_temp, min_temp, id, condition_icon,
-                        daily_xloc]
-            
-            for d in del_list:
-                try:
-                    del d
-                except:
-                    pass
 
             ##~~~~~~~~~~~~~
             ## SEND DATA

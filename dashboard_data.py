@@ -32,7 +32,9 @@ def pollen_color(pollen_level, debug=False):
             color=epd.RED
         else:
             color=epd.WHITE
+            
     return color
+
 
 def aq_color(aq_code, debug=False):
     if debug:
@@ -63,7 +65,9 @@ def aq_color(aq_code, debug=False):
             color=epd.RED
         else:
             color=epd.WHITE
+
     return color
+
 
 def uvi_color(uvi, debug=False):
     if debug:
@@ -104,6 +108,7 @@ def uvi_color(uvi, debug=False):
             color=epd.RED
         else:
             color=epd.BLACK
+
     return color
 
 
@@ -120,6 +125,7 @@ curr_weather_icons = {
     "snow": "./icons/snow.bmp",
     "atmospheric": "./icons/atm.bmp",
 }
+
 
 def get_condition_icon(id, is_daytime, daily=False):
     id = str(id)
@@ -145,6 +151,7 @@ def get_condition_icon(id, is_daytime, daily=False):
             icon  = curr_weather_icons["partly cloudy night"]
     elif id in ["803", "804"]:
         icon  = curr_weather_icons["mostly cloudy"]
+
     return icon
 
 
@@ -158,7 +165,7 @@ airnow_zipsite_current = "/aq/observation/zipCode/current"
 airnow_zipsite_forecast = "/aq/forecast/zipCode/"
 
 
-def get_aq_current(airnow_api_key, zipcode="77008"):
+def get_aq_data(airnow_api_key, zipcode="77008"):
     """
     Get the AirNow API response for current air quality.
     Defaulting to Houston Heights
@@ -167,22 +174,20 @@ def get_aq_current(airnow_api_key, zipcode="77008"):
     payload["zipCode"] = zipcode
     payload["format"] = "JSON"
     payload["api_key"] = airnow_api_key
-    with requests.get(airnow_host+airnow_zipsite_current, params=payload, timeout=5) as response:
+    with requests.get(airnow_host+airnow_zipsite_current, params=payload, timeout=10) as response:
         try:
             return response
-        finally:
-            response.close()
+        except (requests.ConnectionError, requests.Timeout) as exception:
+            return None
+        
 
-def get_ozone_current(**kwargs):
+def get_ozone_current(response):
     """
     Parse the AirNow current air quality API response
     for Ozone value and level
     """
     ozone_value, ozone_level, ozone_code = None, None, None
     
-    response = get_aq_current(**kwargs)
-    if response.status_code in [404, 504]:
-        return ozone_value, ozone_level, ozone_code
     aq = json.loads(response.text)
     
     for i in range(len(aq)):
@@ -199,18 +204,17 @@ def get_ozone_current(**kwargs):
                 ozone_code = aq[i]["Category"]["Number"]
             except:
                 pass
+
     return ozone_value, ozone_level, ozone_code
 
-def get_particulate_current(**kwargs):
+
+def get_particulate_current(response):
     """
     Parse the AirNow current air quality API response
     for Particulate 2.5 value and level
     """
     part_value, part_level, part_code = None, None, None
     
-    response = get_aq_current(**kwargs)
-    if response.status_code in [404, 504]:
-        return part_value, part_level, part_code
     aq = json.loads(response.text)
     
     for i in range(len(aq)):
@@ -227,36 +231,17 @@ def get_particulate_current(**kwargs):
                 part_code = aq[i]["Category"]["Number"]
             except:
                 pass
+
     return part_value, part_level, part_code
 
-def get_aq_tomorrow(airnow_api_key, zipcode="77008"):
-    """
-    Get the AirNow API response for tomorrow's air quality.
-    Defaulting to Houston Heights.
-    """
-    current_time = datetime.now()
-    today = current_time.date()
-    tomorrow = today + timedelta(days=1)
-    payload = {}
-    payload["zipCode"] = zipcode
-    payload["format"] = "JSON"
-    payload["api_key"] = airnow_api_key
-    with requests.get(airnow_host+airnow_zipsite_forecast, params=payload, timeout=5) as response:
-        try:
-            return response
-        finally:
-            response.close()
 
-def get_ozone_forecast(**kwargs):
+def get_ozone_forecast(response):
     """
     Parse the AirNow forecasted air quality API response
     for Ozone value and level
     """
     ozone_level, ozone_code = None, None
     
-    response = get_aq_tomorrow(**kwargs)
-    if response.status_code in [404, 504]:
-        return ozone_level, ozone_code
     aq = json.loads(response.text)
 
     current_time = datetime.now()
@@ -264,27 +249,29 @@ def get_ozone_forecast(**kwargs):
     tomorrow = today + timedelta(days=1)
     
     for i in range(len(aq)):
-        if aq[i]["ParameterName"]=="O3" and aq[i]["DateForecast"]==str(tomorrow):
-            try:
-                ozone_level = aq[i]["Category"]["Name"]
-            except:
-                pass
-            try:
-                ozone_code = aq[i]["Category"]["Number"]
-            except:
-                pass
+        try:
+            if aq[i]["ParameterName"]=="O3" and aq[i]["DateForecast"]==str(tomorrow):
+                try:
+                    ozone_level = aq[i]["Category"]["Name"]
+                except:
+                    pass
+                try:
+                    ozone_code = aq[i]["Category"]["Number"]
+                except:
+                    pass
+        except KeyError:
+            pass
+
     return ozone_level, ozone_code
 
-def get_particulate_forecast(**kwargs):
+
+def get_particulate_forecast(response):
     """
     Parse the AirNow forecasted air quality API response
     for Particulate 2.5 value and level
     """
     part_level, part_code = None, None
     
-    response = get_aq_tomorrow(**kwargs)
-    if response.status_code in [404, 504]:
-        return part_level, part_code
     aq = json.loads(response.text)
 
     current_time = datetime.now()
@@ -292,17 +279,58 @@ def get_particulate_forecast(**kwargs):
     tomorrow = today + timedelta(days=1)
     
     for i in range(len(aq)):
-        if aq[i]["ParameterName"]=="PM2.5" and aq[i]["DateForecast"]==str(tomorrow):
-            try:
-                part_level = aq[i]["Category"]["Name"]
-            except:
-                pass
-            try:
-                part_code = aq[i]["Category"]["Number"]
-            except:
-                pass
+        try:
+            if aq[i]["ParameterName"]=="PM2.5" and aq[i]["DateForecast"]==str(tomorrow):
+                try:
+                    part_level = aq[i]["Category"]["Name"]
+                except:
+                    pass
+                try:
+                    part_code = aq[i]["Category"]["Number"]
+                except:
+                    pass
+        except KeyError:
+            pass
+
     return part_level, part_code
 
+
+def get_air_quality(**kwargs):
+    """ 
+    Main function to get the current and forecasted air
+    quality, i.e., ozone and particulate levels
+    """
+
+    air_quality = {
+        "ozone_code_current": None,
+        "ozone_code_fore": None, 
+        "part_code_current": None,
+        "part_code_fore": None
+    }
+
+    response = get_aq_data(**kwargs)
+
+    if response is None:
+        return air_quality
+    
+    elif response.status_code in [404, 504]:
+        return air_quality
+    
+    else:
+        ## Gathering additional data in case needed in later versions,
+        ## leaving as orphan variables for now
+        oz_val, oz_lev, oz_code = get_ozone_current(response)
+        part_val, part_lev, part_code = get_particulate_current(response)
+        oz_fore_lev, oz_fore_code = get_ozone_forecast(response)
+        part_fore_lev, part_fore_code = get_particulate_forecast(response)
+
+        air_quality["ozone_code_current"] = oz_code
+        air_quality["ozone_code_fore"] = oz_fore_code
+        air_quality["part_code_current"] = part_code
+        air_quality["part_code_fore"] = part_fore_code
+
+        return air_quality
+    
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## POLLEN FUNCTIONS
@@ -317,6 +345,7 @@ def get_last_friday():
     d = {0:3,1:4,2:5,3:6,4:0,5:1,6:2}
     last_friday = datetime.today()-timedelta(days=d[datetime.today().weekday()])
     return last_friday
+
 
 def make_payload_addition(use_yesterday=False):
     """
@@ -339,6 +368,7 @@ def make_payload_addition(use_yesterday=False):
     payload_addition = "-".join(p for p in tmp_lst)
     
     return payload_addition
+
 
 def get_pollen_data():
     """
@@ -416,6 +446,7 @@ def get_weather(weather_api_key, latitude, longitude):
             return response
         finally:
             response.close()
+
 
 def kelvin_to_farenheit(temp_K):
     """
@@ -512,6 +543,7 @@ def hourly_forecast(response, hours=8):
 
     return hourly_forecast
 
+
 def daily_forecast(response, days=5):
     """
     Return the daily forecasted min/max temperatures
@@ -553,6 +585,7 @@ def daily_forecast(response, days=5):
         daily_forecast.append(tmp_dict)
 
     return daily_forecast
+
 
 def make_weather_data(**kwargs):
     """

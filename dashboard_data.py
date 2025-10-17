@@ -174,7 +174,7 @@ def get_aq_data(airnow_api_key, zipcode="77008"):
     payload["zipCode"] = zipcode
     payload["format"] = "JSON"
     payload["api_key"] = airnow_api_key
-    with requests.get(airnow_host+airnow_zipsite_current, params=payload, timeout=10) as response:
+    with requests.get(airnow_host+airnow_zipsite_current, params=payload, timeout=30) as response:
         try:
             return response
         except (requests.ConnectionError, requests.Timeout) as exception:
@@ -383,13 +383,14 @@ def get_pollen_data():
     payload_addition = make_payload_addition()
     payload = payload_base+payload_addition
     url = url_base + payload
-    page = requests.get(url, timeout=5)
+    timeout = 20
+    page = requests.get(url, timeout=timeout)
 
     if page.status_code == 404:
         payload_addition = make_payload_addition(use_yesterday=True)
         payload = payload_base+payload_addition
         url = url_base + payload
-        page = requests.get(url, timeout=5)
+        page = requests.get(url, timeout=timeout)
 
         if page.status_code == 404:
             ## because they fat finger the second hyphen
@@ -398,7 +399,7 @@ def get_pollen_data():
             payload_addition = payload_addition[:idx] + payload_addition[idx+1:]
             payload = payload_base+payload_addition
             url = url_base + payload
-            page = requests.get(url, timeout=5)
+            page = requests.get(url, timeout=timeout)
 
             if page.status_code == 404:
                 ## because they fat finger the second hyphen
@@ -407,7 +408,7 @@ def get_pollen_data():
                 payload_addition = payload_addition[:idx] + payload_addition[idx+1:]
                 payload = payload_base+payload_addition
                 url = url_base + payload
-                page = requests.get(url, timeout=5)
+                page = requests.get(url, timeout=timeout)
     
     soup = BeautifulSoup(page.content, "html.parser")
     tmp = soup.find_all("p", class_="text-align-center")
@@ -441,7 +442,7 @@ def get_weather(weather_api_key, latitude, longitude):
     lat_str = "lat="+latitude
     long_str = "&lon="+longitude
     api_str = "&appid="+weather_api_key
-    with requests.get(base+lat_str+long_str+api_str, timeout=5) as response:
+    with requests.get(base+lat_str+long_str+api_str, timeout=30) as response:
         try:
             return response
         finally:
@@ -520,6 +521,11 @@ def hourly_forecast(response, hours=8):
             tmp_dict[str(i)]["id"] = None
             hourly_forecast.append(tmp_dict)
         return hourly_forecast
+    
+    sunrise_today = resp["current"]["sunrise"]
+    sunset_today = resp["current"]["sunset"]
+    sunrise_tomorrow = resp["daily"][0]["sunrise"]
+    sunset_tomorrow = resp["daily"][0]["sunset"]
 
     forecast = resp["hourly"][:hours]
     for f in forecast:
@@ -539,6 +545,12 @@ def hourly_forecast(response, hours=8):
         tmp_dict[str(hour)] = {}
         tmp_dict[str(hour)]["temp_f"] = temp_f
         tmp_dict[str(hour)]["id"] = id
+        if sunrise_today < time < sunset_today:
+            tmp_dict[str(hour)]["daytime"] = True
+        elif sunrise_tomorrow < time < sunset_tomorrow:
+            tmp_dict[str(hour)]["daytime"] = True
+        else:
+            tmp_dict[str(hour)]["daytime"] = False
         hourly_forecast.append(tmp_dict)
 
     return hourly_forecast

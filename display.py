@@ -363,6 +363,7 @@ def make_display(debug=debug):
                     hour = list(f.keys())[0]
                     temp = f[hour]["temp_f"]
                     id = f[hour]["id"] 
+                    is_daytime = f[hour]["daytime"]
 
                     draw.text((hourly_xloc, hourly_yloc+50), 
                           hour, font=nasa_font_20, fill=sub_text_col1)
@@ -473,68 +474,8 @@ def clear_and_pause(pause_time = 25200):
 
 def weather_display():
     if debug:
-        ## Running three times to ensure no resource leakage
-        ## Current test suggests issue is resolved Oct 12th 2025
-        import gc
-        obs1 = gc.get_objects()
-        print(f"\nObs 1: {len(obs1)}")
-        del obs1
-
         debug_img = make_display(debug=debug)
         debug_img.save(debug_save_location, quality=100, subsampling=0)
-        debug_img.close()
-        del debug_img
-
-        obs2 = gc.get_objects()
-        print(f"Obs 2: {len(obs2)}")
-        del obs2
-
-        gc.collect()
-        obs3 = gc.get_objects()
-        print(f"Obs 3: {len(obs3)}")
-        del obs3
-
-        print("\n~~Second Run~~")
-        time.sleep(1)
-
-        obs1 = gc.get_objects()
-        print(f"Obs 1: {len(obs1)}")
-        del obs1
-
-        debug_img = make_display(debug=debug)
-        debug_img.save(debug_save_location, quality=100, subsampling=0)
-        debug_img.close()
-        del debug_img
-
-        obs2 = gc.get_objects()
-        print(f"Obs 2: {len(obs2)}")
-        del obs2
-
-        gc.collect()
-        obs3 = gc.get_objects()
-        print(f"Obs 3: {len(obs3)}")
-        del obs3
-
-        print("\n~~Third Run~~")
-        time.sleep(1)
-
-        obs1 = gc.get_objects()
-        print(f"Obs 1: {len(obs1)}")
-        del obs1
-
-        debug_img = make_display(debug=debug)
-        debug_img.save(debug_save_location, quality=100, subsampling=0)
-        debug_img.close()
-        del debug_img
-
-        obs2 = gc.get_objects()
-        print(f"Obs 2: {len(obs2)}")
-        del obs2
-
-        gc.collect()
-        obs3 = gc.get_objects()
-        print(f"Obs 3: {len(obs3)}")
-        del obs3
 
     else:
         try:

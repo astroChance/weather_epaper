@@ -165,7 +165,7 @@ airnow_zipsite_current = "/aq/observation/zipCode/current"
 airnow_zipsite_forecast = "/aq/forecast/zipCode/"
 
 
-def get_aq_data(airnow_api_key, zipcode="77008"):
+def get_aq_data_current(airnow_api_key, zipcode="77008"):
     """
     Get the AirNow API response for current air quality.
     Defaulting to Houston Heights
@@ -175,6 +175,22 @@ def get_aq_data(airnow_api_key, zipcode="77008"):
     payload["format"] = "JSON"
     payload["api_key"] = airnow_api_key
     with requests.get(airnow_host+airnow_zipsite_current, params=payload, timeout=30) as response:
+        try:
+            return response
+        except (requests.ConnectionError, requests.Timeout) as exception:
+            return None
+        
+
+def get_aq_data_forecast(airnow_api_key, zipcode="77008"):
+    """
+    Get the AirNow API response for current air quality.
+    Defaulting to Houston Heights
+    """
+    payload = {}
+    payload["zipCode"] = zipcode
+    payload["format"] = "JSON"
+    payload["api_key"] = airnow_api_key
+    with requests.get(airnow_host+airnow_zipsite_forecast, params=payload, timeout=30) as response:
         try:
             return response
         except (requests.ConnectionError, requests.Timeout) as exception:
@@ -308,21 +324,23 @@ def get_air_quality(**kwargs):
         "part_code_fore": None
     }
 
-    response = get_aq_data(**kwargs)
+    response_current = get_aq_data_current(**kwargs)
+    response_forecast = get_aq_data_forecast(**kwargs)
 
-    if response is None:
+    if response_current is None and response_forecast is None:
         return air_quality
     
-    elif response.status_code in [404, 504]:
-        return air_quality
+    elif response_current.status_code in [404, 504]:
+        if response_forecast.status_code in [404, 504]:
+            return air_quality
     
     else:
         ## Gathering additional data in case needed in later versions,
         ## leaving as orphan variables for now
-        oz_val, oz_lev, oz_code = get_ozone_current(response)
-        part_val, part_lev, part_code = get_particulate_current(response)
-        oz_fore_lev, oz_fore_code = get_ozone_forecast(response)
-        part_fore_lev, part_fore_code = get_particulate_forecast(response)
+        oz_val, oz_lev, oz_code = get_ozone_current(response_current)
+        part_val, part_lev, part_code = get_particulate_current(response_current)
+        oz_fore_lev, oz_fore_code = get_ozone_forecast(response_forecast)
+        part_fore_lev, part_fore_code = get_particulate_forecast(response_forecast)
 
         air_quality["ozone_code_current"] = oz_code
         air_quality["ozone_code_fore"] = oz_fore_code

@@ -8,6 +8,7 @@ from datetime import datetime
 import requests
 import logging
 from logging.handlers import RotatingFileHandler
+import os
 
 
 ##~~~~~~~~~~~~~~~~~
@@ -489,6 +490,9 @@ def weather_display():
         except KeyboardInterrupt:
             epd.Clear()
             epaper.epaper(epap_model).epdconfig.module_exit(cleanup=True)
+
+        except OSError:
+            os.system("sudo reboot")
             
         except Exception as exception:
             logging.exception("FAIL in main function")

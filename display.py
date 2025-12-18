@@ -490,13 +490,15 @@ def weather_display():
         except KeyboardInterrupt:
             epd.Clear()
             epaper.epaper(epap_model).epdconfig.module_exit(cleanup=True)
-
-        except OSError:
-            os.system("sudo reboot")
             
         except Exception as exception:
             logging.exception("FAIL in main function")
             print(exception)
+
+            ## reboot is OSError
+            if type(exception).__name__ == "OSError":
+                os.system("sudo reboot")
+
             epd.init()
             epd.Clear()
 

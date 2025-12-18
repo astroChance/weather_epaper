@@ -4,7 +4,7 @@
 chmod +x /home/amos/Desktop/weather_epaper/run_epap.sh
 
 sudo crontab -e
-@reboot sh /home/amos/Desktop/weather_epaper/run_epap.sh &
+@reboot /home/amos/Desktop/weather_epaper/run_epap.sh &
 
-## ctrl+s 
+## ctrl+o 
 ## ctrl+x

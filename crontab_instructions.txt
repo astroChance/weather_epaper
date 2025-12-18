@@ -1,5 +1,8 @@
 ## make the shell script run on reboot
 
+## first, make .sh file executable
+chmod +x /home/amos/Desktop/weather_epaper/run_epap.sh
+
 sudo crontab -e
 @reboot sh /home/amos/Desktop/weather_epaper/run_epap.sh &
 

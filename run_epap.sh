@@ -1,6 +1,8 @@
 #!/bin/bash
 
 cd /home/amos
-epap/bin/python3 /Desktop/weather_epaper/display.py
+source epap/bin/activate
+cd Desktop/weather_epaper/
+python display.py
 
 /bin/bash

@@ -1,0 +1,7 @@
+## make the shell script run on reboot
+
+sudo crontab -e
+@reboot sh /home/amos/Desktop/weather_epaper/run_epap.sh &
+
+## ctrl+s 
+## ctrl+x
